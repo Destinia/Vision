@@ -45,7 +45,7 @@ def extend(args, store=None):
     if not store:
         store = get_firestore(args.cert, args.config)
     collection = store.collection(args.collection)
-    values = [snapshot.reference.get().to_dict()['value']
+    values = [snapshot.reference.get().to_dict()['values']
               for snapshot in collection.where('name', '==', args.name).get()]
 
     documents = [snapshot.reference
