@@ -1,11 +1,16 @@
 import React from 'react'
 import { Provider } from 'react-redux'
+
 import Home from './Home'
 import configureStore from './store'
+import { initializeConnector } from './connectors/firestore'
+
 import './App.css'
 
-const initialState = window.__INITIAL_STATE__ || { firebase: { authError: null } }
-const store = configureStore(initialState)
+initializeConnector()
+const store = configureStore()
+
+window.store = store
 
 export default () => (
   <Provider store={store}>

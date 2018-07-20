@@ -12,3 +12,7 @@ build
 # misc
 .DS_Store
 npm-debug.log
+
+# firebase
+firebase-config.json
+firebase-admin.json
