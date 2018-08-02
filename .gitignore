@@ -13,6 +13,6 @@ build
 .DS_Store
 npm-debug.log
 
-# firebase
+# Firebase
 firebase-config.json
 firebase-admin.json
