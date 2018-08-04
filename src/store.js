@@ -1,29 +1,20 @@
 import { createStore, compose } from 'redux'
 import rootReducer from './reducer'
-import { firebase as fbConfig } from './config'
-import firebase from 'firebase/app'
-import 'firebase/auth'
-import 'firebase/database'
-import 'firebase/firestore' // make sure you add this for firestore
-import { reactReduxFirebase } from 'react-redux-firebase'
-import { reduxFirestore } from 'redux-firestore'
+import { connectorEnhancer } from './connectors/firestore'
 
-export default function configureStore (initialState, history) {
-  // Initialize Firebase instance
-  firebase.initializeApp(fbConfig)
-  // Initialize Firestore with timeshot settings
-  firebase.firestore().settings({ timestampsInSnapshots: true })
+function devToolsEnhancer() {
+  if (typeof window === 'object' &&
+      typeof window.devToolsExtension !== 'undefined') {
+    return window.devToolsExtension()
+  }
 
+  return f => f
+}
+
+export default function configureStore() {
   const createStoreWithMiddleware = compose(
-    reactReduxFirebase(firebase,
-      {
-        userProfile: 'users',
-        useFirestoreForProfile: true, // Store in Firestore instead of Real Time DB
-        enableLogging: false
-      }
-    ),
-    reduxFirestore(firebase),
-    typeof window === 'object' && typeof window.devToolsExtension !== 'undefined' ? window.devToolsExtension() : f => f
+    connectorEnhancer(),
+    devToolsEnhancer(), // Make sure it's at the bottom of the enhancer list.
   )(createStore)
 
   const store = createStoreWithMiddleware(rootReducer)
