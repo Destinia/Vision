@@ -8,20 +8,14 @@ import { createStructuredSelector, createSelector } from 'reselect'
 // Use symbolic link to link to the config in the root directory
 import firebaseConfig from './firebase-config.json'
 
-const connectorConfig = {
-  collection: 'test-ianchen',
-}
-
 const DEFAULT_DATA = {
   values: [],
   type: 'number',
 }
 
-export function initializeConnector() {
-  // Initialize Firebase instance
-  firebase.initializeApp(firebaseConfig)
-  // Initialize Firestore with timeshot settings
-  firebase.firestore().settings({ timestampsInSnapshots: true })
+
+const connectorConfig = {
+  collection: 'test-ianchen',
 }
 
 const collectionLookup = (obj, defaultValue) =>
@@ -72,7 +66,14 @@ export function connectorReducer(state, action) {
   return dataSelector(connectorState)
 }
 
-export function connectorEnhancer() {
+export function connectorEnhancer(config = {}) {
+  Object.assign(connectorConfig, config)
+
+  // Initialize Firebase instance
+  firebase.initializeApp(firebaseConfig)
+  // Initialize Firestore with timeshot settings
+  firebase.firestore().settings({ timestampsInSnapshots: true })
+
   return createStore => (...args) => {
     const store = reduxFirestore(firebase, {
       enhancerNamespace: 'connector',

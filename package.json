@@ -16,6 +16,7 @@
     "recompose": "^0.27.1",
     "redux": "^3.6.0",
     "redux-firestore": "latest",
+    "redux-localstorage": "^0.4.1",
     "reselect": "^3.0.1"
   },
   "scripts": {

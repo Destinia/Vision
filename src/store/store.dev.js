@@ -1,6 +1,4 @@
 import { createStore, compose } from 'redux'
-import rootReducer from './reducer'
-import { connectorEnhancer } from './connectors/firestore'
 
 function devToolsEnhancer() {
   if (typeof window === 'object' &&
@@ -11,9 +9,9 @@ function devToolsEnhancer() {
   return f => f
 }
 
-export default function configureStore() {
+export default function configureStore(rootReducer, ...enhancers) {
   const createStoreWithMiddleware = compose(
-    connectorEnhancer(),
+    ...enhancers,
     devToolsEnhancer(), // Make sure it's at the bottom of the enhancer list.
   )(createStore)
 
@@ -21,11 +19,13 @@ export default function configureStore() {
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
-    module.hot.accept('./reducer', () => {
-      const nextRootReducer = require('./reducer')
+    module.hot.accept('../reducer', () => {
+      const nextRootReducer = require('../reducer')
       store.replaceReducer(nextRootReducer)
     })
   }
+
+  window.store = store
 
   return store
 }
