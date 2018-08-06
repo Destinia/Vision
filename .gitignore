@@ -16,3 +16,5 @@ npm-debug.log
 # Firebase
 firebase-config.json
 firebase-admin.json
+
+package-lock.json
