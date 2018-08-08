@@ -1,21 +1,19 @@
-import TOML from 'toml'
-import tomlify from 'tomlify-j0.4'
+import YAML from 'js-yaml'
 
 // (JSON/TOML)-formatted string -> Object
-export function parse(s) {
-  return TOML.parse(s)
-  if (format === 'toml') {
+export function parse(s, format = 'json') {
+  if (format === 'yaml') {
     // TODO: post-parsing procedures
-    return TOML.parse(obj)
+    return YAML.safeLoad(s)
   }
-  return JSON.parse(obj)
+  return JSON.parse(s)
 }
 
 // Object -> (JSON/TOML)-formatted string
 export function stringify(obj, format = 'json') {
-  if (format === 'toml') {
+  if (format === 'yaml') {
     // TODO: post-stringify procedures
-    return tomlify.toToml(obj, { space: 2 })
+    return YAML.safeDump(obj)
   }
   return JSON.stringify(obj)
 }
