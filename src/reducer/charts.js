@@ -1,6 +1,4 @@
-const defaultChartState = {
-  0: { layout: {i: 0} , a: 1}
-}
+const defaultChartState = {}
 
 export default (state = defaultChartState, action) => {
   switch (action.type) {
