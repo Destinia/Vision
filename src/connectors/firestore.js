@@ -3,40 +3,58 @@ import 'firebase/auth'
 import 'firebase/database'
 import 'firebase/firestore' // make sure you add this for firestore
 import { reduxFirestore, firestoreReducer } from 'redux-firestore'
-import { createStructuredSelector } from 'reselect'
+import { createStructuredSelector, createSelector } from 'reselect'
 
 // Use symbolic link to link to the config in the root directory
 import firebaseConfig from './firebase-config.json'
+
+const DEFAULT_DATA = {
+  values: [],
+  type: 'number',
+}
+
 
 const connectorConfig = {
   collection: 'test-ianchen',
 }
 
-export function initializeConnector() {
-  // Initialize Firebase instance
-  firebase.initializeApp(firebaseConfig)
-  // Initialize Firestore with timeshot settings
-  firebase.firestore().settings({ timestampsInSnapshots: true })
-}
+const collectionLookup = (obj, defaultValue) =>
+  (obj || {})[connectorConfig.collection] || defaultValue
 
-function getConnectorKey(obj, val) {
-  return connectorConfig.collection in obj ? obj[connectorConfig.collection] : val
-}
-
-function getStatus({ status }) {
+function getStatus({ status = {} }) {
   return {
-    requesting: getConnectorKey(status.requesting),
-    requested: getConnectorKey(status.requested),
-    timestamps: getConnectorKey(status.timestamps),
+    requesting: collectionLookup(status.requesting, false),
+    requested: collectionLookup(status.requested, false),
+    timestamps: collectionLookup(status.timestamps, 0),
   }
 }
 
-function getData({ data }) {
-  return getConnectorKey(data)
-}
+const getData = createSelector(
+  x => collectionLookup(x.data, {}),
+  (items) => {
+    const ret = {}
+    for (const item of Object.values(items)) {
+      const { name, ...values } = item
+      ret[name] = { ...DEFAULT_DATA, ...values }
+    }
+    return ret
+  },
+)
+
+const getSchema = createSelector(
+  getData,
+  (data) => {
+    const ret = {}
+    for (const name of Object.keys(data)) {
+      ret[name] = data[name].type || DEFAULT_DATA.type
+    }
+
+    return ret
+  }
+)
 
 const dataSelector = createStructuredSelector({
-  schema: state => ({}),
+  schema: getSchema,
   status: getStatus,
   data: getData,
 })
@@ -48,7 +66,14 @@ export function connectorReducer(state, action) {
   return dataSelector(connectorState)
 }
 
-export function connectorEnhancer() {
+export function connectorEnhancer(config = {}) {
+  Object.assign(connectorConfig, config)
+
+  // Initialize Firebase instance
+  firebase.initializeApp(firebaseConfig)
+  // Initialize Firestore with timeshot settings
+  firebase.firestore().settings({ timestampsInSnapshots: true })
+
   return createStore => (...args) => {
     const store = reduxFirestore(firebase, {
       enhancerNamespace: 'connector',
