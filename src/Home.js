@@ -17,9 +17,6 @@ const enhance = compose(
 
 const Home = ({ data }) => (
   <div className='App'>
-    <div className='App-header'>
-      <h2>firestore demo</h2>
-    </div>
     <Layout data={data} />
   </div>
 )
