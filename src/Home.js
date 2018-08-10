@@ -2,22 +2,25 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
+import Layout from './Layout'
+import Plot from './plots'
 import './App.css'
+
 
 const enhance = compose(
   connect(
     ({ connector }) => ({
-      todos: connector.data ? Object.keys(connector.data) : [],
+      data: connector.data ? Object.values(connector.data) : [],
     })
   ),
 )
 
-const Home = ({ todos }) => (
+const Home = ({ data }) => (
   <div className='App'>
     <div className='App-header'>
       <h2>firestore demo</h2>
-        { todos.map(x => <p key={x}>{x}</p>) }
     </div>
+    <Layout data={data} />
   </div>
 )
 
