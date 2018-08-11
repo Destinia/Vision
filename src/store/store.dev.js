@@ -1,4 +1,5 @@
 import { createStore, compose } from 'redux'
+import checkpointEnhancer from './checkpointEnhancer'
 
 function devToolsEnhancer() {
   if (typeof window === 'object' &&
@@ -10,12 +11,15 @@ function devToolsEnhancer() {
 }
 
 export default function configureStore(rootReducer, ...enhancers) {
-  const createStoreWithMiddleware = compose(
+  const createStoreWithEnhancers = compose(
     ...enhancers,
+    checkpointEnhancer({
+      path: 'charts',
+    }),
     devToolsEnhancer(), // Make sure it's at the bottom of the enhancer list.
   )(createStore)
 
-  const store = createStoreWithMiddleware(rootReducer)
+  const store = createStoreWithEnhancers(rootReducer)
 
   if (module.hot) {
     // Enable Webpack hot module replacement for reducers
