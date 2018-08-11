@@ -1,4 +1,4 @@
-export const addChart = (key, layout, chart) => ({
+export const addChart = ({key, layout, chart}) => ({
   type: 'ADD_CHART',
   key,
   layout,
