@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import Layout from './Layout'
-import Plot from './plots'
 import './App.css'
 
 

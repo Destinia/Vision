@@ -19,7 +19,7 @@ const selectPeriod = (data, startTime, endTime) => {
   const { values } = data
   const start = values.findIndex(d => moment.unix(d.timestamp).isSameOrAfter(startTime))
   let end = values.findIndex(d => moment.unix(d.timestamp).isAfter(endTime))
-  if (end == -1) {
+  if (end === -1) {
     end = values.length
   }
   const periodData = values.slice(start, end)

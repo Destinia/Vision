@@ -1,5 +1,4 @@
 import React from "react";
-import _ from "lodash";
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { Responsive, WidthProvider } from "react-grid-layout";
@@ -69,7 +68,7 @@ class ShowcaseLayout extends React.Component {
             disableClick
             style={dropZoneStyle}
           >
-            <img src={Upload} width="50%" height="50%" />
+            <img src={Upload} width="50%" height="50%" alt="upload" />
           </Dropzone>
         </div>)
     }
@@ -101,7 +100,7 @@ class ShowcaseLayout extends React.Component {
 
   onLayoutChange = (layout, layouts) => {
     if (this.state.mounted) {
-      const rwdLayouts = Object.values(layouts).find(l => l.length != 0) || [];
+      const rwdLayouts = Object.values(layouts).find(l => l.length !== 0) || [];
       this.props.updateChartLayouts(rwdLayouts);
     }
   };

@@ -1,5 +1,4 @@
-Skip to content Search or jump to… Pull requests Issues Marketplace Explore @Destinia Sign out 182 6,
-808 796 STRML/react-grid-layout Code Issues 261 Pull requests 38 Projects 0 Wiki Insights react-grid-layout/examples/example-styles.css 3f0a846 on 28 Feb @jhob jhob feat(toolbox): include a toolbox demo @STRML @jhob @seanich @jason-henriksen 98 lines (94 sloc) 1.51 KB body {
+body {
     background: white;
     padding: 20px;
     overflow: scroll;
