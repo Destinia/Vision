@@ -4,7 +4,7 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
 import { overwriteChart } from './action'
-import { jumpCheckpoint } from './store/checkpointEnhancer'
+import { jumpCheckpoint, addCheckpoint } from './store/checkpointEnhancer'
 import { loadFile, exportFile } from './utils'
 
 import './NavBar.css'
@@ -28,7 +28,10 @@ function onFileUpload(dispatch, e) {
   const file = e.target.files.length === 0 ? undefined : e.target.files[0]
   if (!file) return
 
-  loadFile(file, obj => dispatch(overwriteChart(obj)))
+  loadFile(file, obj => {
+    dispatch(addCheckpoint())
+    dispatch(overwriteChart(obj))
+  })
 }
 
 const NavBar = ({ canUndo, canRedo, undo, redo, upload, download }) => (
