@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { saveAs } from 'file-saver/FileSaver'
 
 const defaultMarker = {
   color: '#19d3f3',
@@ -42,4 +43,21 @@ export const getPlotData = (data, chart) => {
     marker: defaultMarker,
   }))
 	return { data: chartData, layout: { ...defaultLayout, title }}
+}
+
+export const loadFile = (file, callback) => {
+  const reader = new FileReader()
+  reader.onload = evt => {
+    const obj = JSON.parse(evt.target.result)
+    callback(obj)
+  }
+  reader.readAsText(file)
+}
+
+export function exportFile(charts) {
+  const blob = new Blob([JSON.stringify(charts)], {
+    type: "application/json;charset=utf-8"
+  })
+
+  saveAs(blob, 'charts.json')
 }
