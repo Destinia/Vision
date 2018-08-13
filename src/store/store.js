@@ -1,12 +1,14 @@
 import { createStore, compose } from 'redux'
 import persistState from 'redux-localstorage'
-
-import rootReducer from '../reducer'
+import checkpointEnhancer from './checkpointEnhancer'
 
 export default function configureStore(rootReducer, ...enhancers) {
-  const createStoreWithMiddleware = compose(
+  const createStoreWithEnhancers = compose(
     ...enhancers,
+    checkpointEnhancer({
+      path: 'charts',
+    }),
     persistState('charts'),
   )(createStore)
-  return createStoreWithMiddleware(rootReducer)
+  return createStoreWithEnhancers(rootReducer)
 }
