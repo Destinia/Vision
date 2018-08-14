@@ -34,13 +34,19 @@ function onFileUpload(dispatch, e) {
   })
 }
 
-const NavBar = ({ canUndo, canRedo, undo, redo, upload, download }) => (
+function onClearLayout(dispatch) {
+  dispatch(overwriteChart({}))
+}
+
+const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear }) => (
   <nav className='navbar'>
     <ul>
       <li><NavIcon iconName='icon-undo' enable={canUndo} onClick={undo} /></li>
       <li><NavIcon iconName='icon-redo' enable={canRedo} onClick={redo} /></li>
-      <li><NavIcon iconName='icon-download3' onClick={download} /></li>
-      <li><NavIcon iconName='icon-upload3' onClick={onUploadBtnClick}/></li>
+      <li className='list-separator'><span>|</span></li>
+      <li><NavIcon iconName='icon-clear' onClick={clear} /></li>
+      <li><NavIcon iconName='icon-download' onClick={download} /></li>
+      <li><NavIcon iconName='icon-upload' onClick={onUploadBtnClick}/></li>
       <input type="file" id="upload-hidden-input"
         onChange={upload} accept="application/x-yaml"/>
     </ul>
@@ -60,5 +66,6 @@ export default connect(
       redo: jumpCheckpoint.bind(null, 1),
     }, dispatch),
     upload: onFileUpload.bind(null, dispatch),
+    clear: onClearLayout.bind(null, dispatch),
   }),
 )(NavBar)
