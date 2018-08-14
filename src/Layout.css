@@ -77,42 +77,78 @@ li b {
 
 .toolbox {
     background-color: #dfd;
-    width: 100%;
-    height: 120px;
-    overflow: scroll;
+  width: 100%;
+  height: 120px;
+  overflow: scroll;
 }
 
 .hide-button {
-    cursor: pointer;
-    position: absolute;
-    font-size: 20px;
-    top: 0px;
-    right: 5px;
+  cursor: pointer;
+  position: absolute;
+  font-size: 20px;
+  top: 0px;
+  right: 5px;
 }
 
 .toolbox__title {
-    font-size: 24px;
-    margin-bottom: 5px;
+  font-size: 24px;
+  margin-bottom: 5px;
 }
 
 .toolbox__items {
-    display: block;
+  display: block;
 }
 
 .toolbox__items__item {
-    display: inline-block;
-    text-align: center;
-    line-height: 40px;
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    padding: 10px;
-    margin: 5px;
-    border: 1px solid black;
-    background-color: #ddd;
+  display: inline-block;
+  text-align: center;
+  line-height: 40px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid black;
+  background-color: #ddd;
 }
 
 .uploadIcon {
-    margin: auto;
-    vertical-align: center;
+  margin: auto;
+  vertical-align: center;
+}
+
+.overlay {
+  position: fixed;
+  display: flex;
+  top: 0px;
+  left: 0px;
+  z-index: 101;
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.fullscreen-container {
+  margin: auto;
+  height: 80vh;
+  width: 80vw;
+}
+
+.editor-container {
+  margin: auto;
+  width: 60%;
+  min-height: 80%;
+}
+
+.editor {
+  z-index: 102;
+}
+
+.editor-close {
+  position: absolute;
+  cursor: pointer;
+  z-index: 102;
+  top: 10%;
+  right: 20%;
+  padding: 3px 3px 0px 0px;
 }

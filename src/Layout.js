@@ -5,10 +5,13 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import Dropzone from 'react-dropzone'
 import fileSaver from 'file-saver'
 import * as actions from './action'
-import Plot from './plots'
+import Chart from './chart'
+import FullscreenChart from './chart/fullscreen'
+import CodeMirror from 'react-codemirror'
 import { getPlotData } from './utils'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
+import 'codemirror/lib/codemirror.css'
 import './Layout.css'
 import Upload from './upload-button.png'
 import Yaml from 'yamljs'
@@ -33,8 +36,9 @@ class ShowcaseLayout extends React.Component {
 
   state = {
     currentBreakpoint: "lg",
-    compactType: "vertical",
+    fullscreen: null,
     mounted: false,
+    editor: '',
   };
 
   componentDidMount() {
@@ -55,33 +59,17 @@ class ShowcaseLayout extends React.Component {
     })
   }
 
-  renderPlot = (l, i) => {
-    const { layout } = l;
-    console.log(l);
-    if (layout.i === 'upload') {
-      let dropZoneRef
-      return (
-        <div key="upload" style={{ borderStyle: 'dashed' }} data-grid={layout} onDoubleClick={() => {dropZoneRef.open()}}>
-          <Dropzone
-            ref={(node) => { dropZoneRef = node;}}
-            onDrop={this.onDrop}
-            disableClick
-            style={dropZoneStyle}
-          >
-            <img src={Upload} width="50%" height="50%" alt="upload" />
-          </Dropzone>
-        </div>)
-    }
-	  return (
-      <div key={i} data-grid={layout}>
-        <Plot
-          data={getPlotData(this.props.data, l)}
-          width={layout.w}
-          height={layout.h}
-        />
-      </div>
-	  );
-	}
+  setFullscreen = (key) => {
+    this.setState({ fullscreen: key })
+  }
+
+  removeChart = (key) => () => {
+    this.props.removeChart(key)
+  }
+
+  closeFullscreen = () => {
+    this.setState({ fullscreen: null })
+  }
 
   onBreakpointChange = breakpoint => {
 	this.setState({
@@ -89,14 +77,13 @@ class ShowcaseLayout extends React.Component {
 	});
   };
 
-  onCompactTypeChange = () => {
-	const { compactType: oldCompactType } = this.state;
-	const compactType =
-	  oldCompactType === "horizontal"
-		? "vertical"
-		: oldCompactType === "vertical" ? null : "horizontal";
-	this.setState({ compactType });
-  };
+  onEditorChange = (value) => {
+    this.setState({ editor: value })
+  }
+
+  closeEditor = () => {
+    this.onEditorChange('')
+  }
 
   onLayoutChange = (layout, layouts) => {
     if (this.state.mounted) {
@@ -132,23 +119,93 @@ class ShowcaseLayout extends React.Component {
 
   }
 
-  render() {
+  renderPlot = (l) => {
+    const { layout, ...chart } = l;
+    console.log(layout);
+    if (layout.i === 'upload') {
+      let dropZoneRef
+      return (
+        <div key={layout.i} style={{ borderStyle: 'dashed' }} data-grid={layout} onDoubleClick={() => {dropZoneRef.open()}}>
+          <Dropzone
+            ref={(node) => { dropZoneRef = node;}}
+            onDrop={this.onDrop}
+            disableClick
+            style={dropZoneStyle}
+          >
+            <img src={Upload} width="50%" height="50%" alt="upload" />
+          </Dropzone>
+        </div>)
+    }
+	  return (
+      <div key={layout.i} data-grid={layout}>
+        <Chart
+          layout={layout}
+          data={getPlotData(this.props.data, l)}
+          width={layout.w}
+          height={layout.h}
+          handleLock={this.props.updateChartStatic}
+          removeChart={this.removeChart(layout.i)}
+          setFullscreen={this.setFullscreen}
+          editChart={() => {this.onEditorChange(Yaml.stringify(chart))}}
+        />
+      </div>
+	  );
+	}
+
+  renderFullscreen = () => {
+    const key = this.state.fullscreen
     return (
-      <ResponsiveReactGridLayout
-        {...this.props}
-        // layouts={{ lg: this.props.data.map((_, i) => ({ x: (i%4)*3, y: (i/4)*3, w: 3, h: 3 }))}}
-        // layouts={{ lg: this.state.layouts }}
-        onBreakpointChange={this.onBreakpointChange}
-        onLayoutChange={this.onLayoutChange}
-        // WidthProvider option
-        measureBeforeMount={false}
-        // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
-        // and set `measureBeforeMount={true}`.
-        useCSSTransforms={this.state.mounted}
-        compactType="vertical"
-      >
-        {this.props.charts.map(this.renderPlot)}
-      </ResponsiveReactGridLayout>
+      <div className="overlay">
+        <div className="fullscreen-container">
+          <FullscreenChart
+            layout={this.state.fullscreen}
+            data={getPlotData(this.props.data, this.props.charts.find(c => c.key === key))}
+            close={this.closeFullscreen}
+          />
+        </div>
+      </div>)
+  }
+
+  renderEditor = () => {
+    return (
+      <div className="overlay">
+        <div className="editor-container">
+          <CodeMirror
+            className="editor"
+            value={this.state.editor}
+            onChange={this.onEditorChange}
+            options={{ lineNumbers: true }}
+          />
+          <i className="material-icons editor-close" onClick={this.closeEditor}>
+            close
+          </i>
+        </div>
+      </div>
+    )
+  }
+
+  render() {
+    // console.log(this.props.charts);
+    return (
+      <div>
+        <ResponsiveReactGridLayout
+          {...this.props}
+          // layouts={{ lg: this.props.data.map((_, i) => ({ x: (i%4)*3, y: (i/4)*3, w: 3, h: 3 }))}}
+          // layouts={{ lg: this.state.layouts }}
+          onBreakpointChange={this.onBreakpointChange}
+          onLayoutChange={this.onLayoutChange}
+          // WidthProvider option
+          measureBeforeMount={false}
+          // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
+          // and set `measureBeforeMount={true}`.
+          useCSSTransforms={this.state.mounted}
+          compactType="vertical"
+        >
+          {this.props.charts.map(this.renderPlot)}
+        </ResponsiveReactGridLayout>
+        {this.state.fullscreen ? this.renderFullscreen() : null}
+        {this.state.editor ? this.renderEditor() : null}
+      </div>
     );
   }
 }
@@ -156,7 +213,7 @@ class ShowcaseLayout extends React.Component {
 export default compose(connect(
     ({ connector, charts }) => ({
       data: connector.data ? connector.data : [],
-      charts: Object.values(charts),
+      charts: Object.keys(charts).map(key => ({ key, ...charts[key] })),
     }),
     { ...actions }
   ))(ShowcaseLayout);
