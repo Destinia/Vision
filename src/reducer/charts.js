@@ -31,7 +31,7 @@ export default (state = defaultChartState, action) => {
 
         newState[layout.i] = {
           ...state[layout.i],
-          layout,
+          layout: JSON.parse(JSON.stringify(layout)),
         }
       }
 

@@ -1,6 +1,7 @@
 import moment from 'moment';
 import { saveAs } from 'file-saver/FileSaver'
 import { aggregatePeriod } from './aggregation'
+import _ from 'lodash'
 
 const defaultMarker = {
   color: '#19d3f3',
@@ -73,4 +74,24 @@ export function exportFile(charts) {
   })
 
   saveAs(blob, 'charts.json')
+}
+
+export const isLayoutsEqual = (a, b) => {
+  const objA = a.reduce((acc, cur) => ({ ...acc, [cur.i]: cur }), {})
+  const objB = b.reduce((acc, cur) => ({ ...acc, [cur.i]: cur }), {})
+  const keyA = Object.keys(objA)
+  const keyB = Object.keys(objB)
+  keyA.sort()
+  keyB.sort()
+  if (!_.isEqual(keyA, keyB))
+    return false
+  return keyA.every(k => isLayoutEqual(objA[k], objB[k]))
+
+}
+
+const requiredKeys = ['x', 'y', 'h', 'w', 'i', 'static']
+
+const isLayoutEqual = (a, b) => {
+  console.log(requiredKeys.every(k => a[k] === b[k]));
+  return requiredKeys.every(k => a[k] === b[k])
 }

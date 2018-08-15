@@ -5,16 +5,20 @@ import { Responsive, WidthProvider } from "react-grid-layout";
 import Dropzone from 'react-dropzone'
 import fileSaver from 'file-saver'
 import * as actions from './action'
+import { addCheckpoint } from './store/checkpointEnhancer'
 import Chart from './chart'
 import FullscreenChart from './chart/fullscreen'
 import CodeMirror from 'react-codemirror'
 import { getPlotData } from './utils'
+import Upload from './upload-button.png'
+import Yaml from 'yamljs'
+import _ from 'lodash'
+import { isLayoutsEqual } from './utils'
+
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import 'codemirror/lib/codemirror.css'
 import './Layout.css'
-import Upload from './upload-button.png'
-import Yaml from 'yamljs'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
@@ -44,7 +48,7 @@ class ShowcaseLayout extends React.Component {
 
   componentDidMount() {
     this.setState({ mounted: true });
-    console.log('mount');
+    // this.props.addCheckpoint()
     this.props.addChart({
       key: 'upload',
       layout: {
@@ -54,7 +58,9 @@ class ShowcaseLayout extends React.Component {
         w: 3,
         h: 3,
         minW: 3,
-        minH: 3
+        minH: 3,
+        moved: false,
+        static: false,
       },
       chart: {}
     })
@@ -88,10 +94,12 @@ class ShowcaseLayout extends React.Component {
     this.onEditorChange('')
   }
 
-  onLayoutChange = (layout, layouts) => {
+  onLayoutChange = (layouts) => {
     if (this.state.mounted) {
-      const rwdLayouts = Object.values(layouts).find(l => l.length !== 0) || [];
-      this.props.updateChartLayouts(rwdLayouts);
+      console.log('layout',this.props.charts.map(c => c.layout), layouts)
+      if (!isLayoutsEqual(this.props.charts.map(c => c.layout), layouts))
+        this.props.addCheckpoint()
+      this.props.updateChartLayouts(JSON.parse(JSON.stringify(layouts)))
     }
   };
 
@@ -105,15 +113,15 @@ class ShowcaseLayout extends React.Component {
     const reader = new FileReader();
     reader.onload = () => {
       const fileAsBinaryString = reader.result;
-      console.log(reader);
       const chart = Yaml.parse(fileAsBinaryString)
       const key = (this.props.charts.length-1).toString()
       const layout = this.props.charts.find(c => c.layout.i === 'upload').layout
-      this.props.addChart({
+      this.props.addCheckpoint()
+      this.props.addChart(JSON.parse(JSON.stringify({
         key,
         layout: { ...layout, i: key },
         chart,
-      })
+      })))
     };
     reader.onabort = () => console.log('file reading was aborted');
     reader.onerror = () => console.log('file reading has failed');
@@ -123,7 +131,7 @@ class ShowcaseLayout extends React.Component {
   }
 
   renderPlot = (l) => {
-    const { layout, ...chart } = l;
+    const { layout, key, ...chart } = l;
     if (layout.i === 'upload') {
       let dropZoneRef
       return (
@@ -134,12 +142,12 @@ class ShowcaseLayout extends React.Component {
             disableClick
             style={dropZoneStyle}
           >
-            <img src={Upload} alt="upload" />
+            <img src={Upload} className="uploadIcon" alt="upload" />
           </Dropzone>
         </div>)
     }
 	  return (
-      <div key={layout.i} data-grid={layout}>
+      <div key={layout.i}>
         <Chart
           layout={layout}
           data={getPlotData(this.props.data, l)}
@@ -192,14 +200,16 @@ class ShowcaseLayout extends React.Component {
       <div>
         <ResponsiveReactGridLayout
           {...this.props}
-          // layouts={{ lg: this.props.data.map((_, i) => ({ x: (i%4)*3, y: (i/4)*3, w: 3, h: 3 }))}}
+          layouts={{[this.state.currentBreakpoint]: this.props.charts.map(c => c.layout)}}
           // layouts={{ lg: this.state.layouts }}
           onBreakpointChange={this.onBreakpointChange}
-          onLayoutChange={this.onLayoutChange}
+          // onLayoutChange={this.onLayoutChange}
           // WidthProvider option
           measureBeforeMount={false}
           // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
           // and set `measureBeforeMount={true}`.
+          onDragStop={this.onLayoutChange}
+          onResizeStop={this.onLayoutChange}
           useCSSTransforms={this.state.mounted}
           compactType="vertical"
         >
@@ -217,5 +227,5 @@ export default compose(connect(
       data: connector.data ? connector.data : [],
       charts: Object.keys(charts).map(key => ({ key, ...charts[key] })),
     }),
-    { ...actions }
+    { ...actions, addCheckpoint }
   ))(ShowcaseLayout);
