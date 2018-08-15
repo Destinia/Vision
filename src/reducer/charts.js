@@ -1,3 +1,5 @@
+import { stat } from "fs";
+
 const defaultChartState = {}
 
 export default (state = defaultChartState, action) => {
@@ -29,11 +31,35 @@ export default (state = defaultChartState, action) => {
 
         newState[layout.i] = {
           ...state[layout.i],
-          layout,
+          layout: JSON.parse(JSON.stringify(layout)),
         }
       }
 
       return newState
+    }
+
+    case 'UPDATE_CHART_STATIC': {
+      console.log(state, action.key);
+      if (!state.hasOwnProperty(action.key)) return state
+      console.log({
+        ...state,
+        [action.key]: {
+          ...state[action.key],
+          layout: { ...state[action.key].layout,
+            static: action.static
+          }
+        }
+      });
+      return {
+        ...state,
+        [action.key]: {
+          ...state[action.key],
+          layout: { ...state[action.key].layout,
+            static: action.static,
+            isDraggable: !action.static,
+          }
+        }
+      }
     }
 
     case 'UPDATE_CHART_SCHEMA': {
@@ -52,6 +78,9 @@ export default (state = defaultChartState, action) => {
 
     case 'OVERWRITE_CHARTS':
       return action.charts
+
+    case 'OVERWRITE_CHARTS':
+      return defaultChartState
 
     default:
       return state
