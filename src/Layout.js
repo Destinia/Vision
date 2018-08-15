@@ -18,6 +18,7 @@ import { isLayoutsEqual } from './utils'
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import 'codemirror/lib/codemirror.css'
+import 'codemirror/mode/yaml/yaml'
 import './Layout.css'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
@@ -184,7 +185,7 @@ class ShowcaseLayout extends React.Component {
             className="editor"
             value={this.state.editor}
             onChange={this.onEditorChange}
-            options={{ lineNumbers: true }}
+            options={{ lineNumbers: true, mode: 'yaml' }}
           />
           <i className="material-icons editor-close" onClick={this.closeEditor}>
             close
