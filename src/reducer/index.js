@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 
 import { connectorReducer } from '../connectors'
-import chartReducer from './charts'
+import blockReducer from './blocks'
 
 /*
 import PropTypes as PT from 'prop-types'
@@ -54,7 +54,7 @@ rootState.propTypes = {
 
 const rootReducer = combineReducers({
   connector: connectorReducer,
-  charts: chartReducer,
+  blocks: blockReducer,
 })
 
 

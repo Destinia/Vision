@@ -6,9 +6,9 @@ export default function configureStore(rootReducer, ...enhancers) {
   const createStoreWithEnhancers = compose(
     ...enhancers,
     checkpointEnhancer({
-      path: 'charts',
+      path: 'blocks',
     }),
-    persistState('charts'),
+    persistState('blocks'),
   )(createStore)
   return createStoreWithEnhancers(rootReducer)
 }

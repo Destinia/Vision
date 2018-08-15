@@ -14,7 +14,7 @@ export default function configureStore(rootReducer, ...enhancers) {
   const createStoreWithEnhancers = compose(
     ...enhancers,
     checkpointEnhancer({
-      path: 'charts',
+      path: 'blocks',
     }),
     devToolsEnhancer(), // Make sure it's at the bottom of the enhancer list.
   )(createStore)

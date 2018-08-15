@@ -1,10 +1,24 @@
-import { stat } from "fs";
+const defaultBlockState = {
+  'upload': {
+    type: 'chart',
+    layout: {
+      i: 'upload',
+      x: 0,
+      y: 0,
+      w: 3,
+      h: 3,
+      minW: 3,
+      minH: 3,
+      moved: false,
+      static: false,
+    },
+    chart: {},
+  }
+}
 
-const defaultChartState = {}
-
-export default (state = defaultChartState, action) => {
+export default (state = defaultBlockState, action) => {
   switch (action.type) {
-    case 'ADD_CHART':
+    case 'ADD_BLOCK':
       return {
       ...state,
       [action.key]: {
@@ -13,7 +27,7 @@ export default (state = defaultChartState, action) => {
       },
     }
 
-    case 'REMOVE_CHART': {
+    case 'REMOVE_BLOCK': {
       const newState = {}
 
       for (const key of Object.keys(state)) {
@@ -24,7 +38,7 @@ export default (state = defaultChartState, action) => {
       return newState
     }
 
-    case 'UPDATE_CHART_LAYOUT': {
+    case 'UPDATE_BLOCK_LAYOUT': {
       const newState = {}
       for (const layout of action.layouts) {
         if (!state.hasOwnProperty(layout.i)) continue
@@ -38,7 +52,7 @@ export default (state = defaultChartState, action) => {
       return newState
     }
 
-    case 'UPDATE_CHART_STATIC': {
+    case 'UPDATE_BLOCK_STATIC': {
       console.log(state, action.key);
       if (!state.hasOwnProperty(action.key)) return state
       console.log({
@@ -62,7 +76,7 @@ export default (state = defaultChartState, action) => {
       }
     }
 
-    case 'UPDATE_CHART_SCHEMA': {
+    case 'UPDATE_BLOCK_SCHEMA': {
       if (!state.hasOwnProperty(action.key)) return state
 
       const newState = {
@@ -76,11 +90,11 @@ export default (state = defaultChartState, action) => {
       return newState
     }
 
-    case 'OVERWRITE_CHARTS':
+    case 'OVERWRITE_BLOCKS':
       return action.charts
 
-    case 'OVERWRITE_CHARTS':
-      return defaultChartState
+    case 'CLEAN_BLOCKS':
+      return defaultBlockState
 
     default:
       return state

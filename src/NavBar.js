@@ -3,7 +3,7 @@ import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { overwriteChart, cleanChart } from './action'
+import { overwriteBlock, cleanBlock } from './action'
 import { jumpCheckpoint, addCheckpoint } from './store/checkpointEnhancer'
 import { loadFile, exportFile } from './utils'
 
@@ -30,13 +30,13 @@ function onFileUpload(dispatch, e) {
 
   loadFile(file, obj => {
     dispatch(addCheckpoint())
-    dispatch(cleanChart())
-    dispatch(overwriteChart(obj))
+    dispatch(cleanBlock())
+    dispatch(overwriteBlock(obj))
   })
 }
 
 function onClearLayout(dispatch) {
-  dispatch(overwriteChart({}))
+  dispatch(overwriteBlock({}))
 }
 
 const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear, preview }) => (
@@ -69,8 +69,8 @@ export default connect(
   }),
   dispatch => ({
     ...bindActionCreators({
-      overwriteChart,
-      cleanChart,
+      overwriteBlock,
+      cleanBlock,
       undo: jumpCheckpoint.bind(null, -1),
       redo: jumpCheckpoint.bind(null, 1),
     }, dispatch),
