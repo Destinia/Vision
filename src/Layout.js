@@ -19,6 +19,7 @@ import Yaml from 'yamljs'
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 const dropZoneStyle = {
+  display: 'flex',
   position: 'relative',
   width: '100%',
   height: '100%',
@@ -82,6 +83,8 @@ class ShowcaseLayout extends React.Component {
   }
 
   closeEditor = () => {
+    const { key, ...schema } = Yaml.parse(this.state.editor)
+    this.props.updateChartSchema(key, schema)
     this.onEditorChange('')
   }
 
@@ -121,18 +124,17 @@ class ShowcaseLayout extends React.Component {
 
   renderPlot = (l) => {
     const { layout, ...chart } = l;
-    console.log(layout);
     if (layout.i === 'upload') {
       let dropZoneRef
       return (
-        <div key={layout.i} style={{ borderStyle: 'dashed' }} data-grid={layout} onDoubleClick={() => {dropZoneRef.open()}}>
+        <div key={layout.i} style={{ border: '2px solid #333', display: 'flex' }} data-grid={layout} onDoubleClick={() => {dropZoneRef.open()}}>
           <Dropzone
             ref={(node) => { dropZoneRef = node;}}
             onDrop={this.onDrop}
             disableClick
             style={dropZoneStyle}
           >
-            <img src={Upload} width="50%" height="50%" alt="upload" />
+            <img src={Upload} alt="upload" />
           </Dropzone>
         </div>)
     }
