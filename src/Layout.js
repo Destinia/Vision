@@ -25,6 +25,9 @@ const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
 const dropZoneStyle = {
   display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
   position: 'relative',
   width: '100%',
   height: '100%',
@@ -143,7 +146,8 @@ class ShowcaseLayout extends React.Component {
             disableClick
             style={dropZoneStyle}
           >
-            <img src={Upload} className="uploadIcon" alt="upload" />
+            <i className="icon-file-upload" style={{ fontSize: '4rem' }} />
+            <span>Upload chart</span>
           </Dropzone>
         </div>)
     }

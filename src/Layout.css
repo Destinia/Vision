@@ -34,6 +34,10 @@ body {
     border: 1px solid black;
 }
 
+.react-grid-placeholder {
+    background: #222 none repeat scroll 0% 0% !important;
+}
+
 .react-grid-item.resizing {
     opacity: 0.9;
 }

@@ -2,16 +2,17 @@
   position: fixed;
   width: 100vw;
   height: 45px;
-  display: block;
+  display: flex;
+  justify-content: space-between;
   z-index: 100;
-  background-color: #e7e7e7;
+  background-color: #e0e0e0;
   text-align: right;
   left: 0;
   top: 0;
 }
 
 .navbar ul {
-  display: block;
+  display: inline-block;
   list-style-type: none;
   margin: 0;
   padding: 0 6px;

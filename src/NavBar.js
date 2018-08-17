@@ -10,8 +10,8 @@ import { loadFile, exportFile } from './utils'
 import './NavBar.css'
 import './icons/style.css'
 
-const NavIcon = ({ enable = true, iconName, onClick }) => (
-  <a href='#' role='button' onClick={enable ? onClick : undefined}>
+const NavIcon = ({ enable = true, iconName, onClick, title }) => (
+  <a href='#' role='button' onClick={enable ? onClick : undefined} title={title}>
     <i className={enable ? iconName : `${iconName} icon-disable`} />
   </a>
 )
@@ -39,15 +39,21 @@ function onClearLayout(dispatch) {
   dispatch(overwriteChart({}))
 }
 
-const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear }) => (
+const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear, preview }) => (
   <nav className='navbar'>
     <ul>
-      <li><NavIcon iconName='icon-undo' enable={canUndo} onClick={undo} /></li>
-      <li><NavIcon iconName='icon-redo' enable={canRedo} onClick={redo} /></li>
+      <li><NavIcon iconName='icon-add-chart' title="Add Chart" /></li>
+      <li><NavIcon iconName='icon-add-markdown' title="Add Markdown" /></li>
+    </ul>
+    <ul>
+      <li><NavIcon iconName={preview ? 'icon-preview-on' : 'icon-preview-off'} title="Toggle Preview" /></li>
       <li className='list-separator'><span>|</span></li>
-      <li><NavIcon iconName='icon-clear' onClick={clear} /></li>
-      <li><NavIcon iconName='icon-download' onClick={download} /></li>
-      <li><NavIcon iconName='icon-upload' onClick={onUploadBtnClick}/></li>
+      <li><NavIcon iconName='icon-undo' enable={canUndo} onClick={undo} title="Undo" /></li>
+      <li><NavIcon iconName='icon-redo' enable={canRedo} onClick={redo} title="Redo" /></li>
+      <li className='list-separator'><span>|</span></li>
+      <li><NavIcon iconName='icon-clear' onClick={clear} title="Clear Layout" /></li>
+      <li><NavIcon iconName='icon-download' onClick={download} title="Export Layout" /></li>
+      <li><NavIcon iconName='icon-upload' onClick={onUploadBtnClick} title="Import Layout"/></li>
       <input type="file" id="upload-hidden-input"
         onChange={upload} accept="application/x-yaml"/>
     </ul>
@@ -59,6 +65,7 @@ export default connect(
     canUndo: current > 0,
     canRedo: history.length - current !== 1,
     download: exportFile.bind(null, charts),
+    preview: true,
   }),
   dispatch => ({
     ...bindActionCreators({
