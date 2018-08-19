@@ -20,9 +20,8 @@ class Chart extends Component {
 
   render() {
     const { data, layout } = this.props.data
-    console.log(this.props);
     const { size } = this.props
-    return <div>
+    return <div onClick={this.props.onClick}>
       <i className="material-icons close-btn" onClick={this.props.close}>
         close
         </i>
