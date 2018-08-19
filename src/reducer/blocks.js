@@ -12,7 +12,7 @@ const defaultBlockState = {
       moved: false,
       static: false,
     },
-    chart: {},
+    block: {},
   }
 }
 
@@ -23,7 +23,7 @@ export default (state = defaultBlockState, action) => {
       ...state,
       [action.key]: {
         layout: action.layout,
-        ...action.chart,
+        ...action.block,
       },
     }
 
@@ -91,7 +91,7 @@ export default (state = defaultBlockState, action) => {
     }
 
     case 'OVERWRITE_BLOCKS':
-      return action.charts
+      return action.blocks
 
     case 'CLEAN_BLOCKS':
       return defaultBlockState

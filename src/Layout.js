@@ -6,8 +6,8 @@ import Dropzone from 'react-dropzone'
 import fileSaver from 'file-saver'
 import * as actions from './action'
 import { addCheckpoint } from './store/checkpointEnhancer'
-import Chart from './chart'
-import FullscreenChart from './chart/fullscreen'
+import Block from './chart'
+import FullscreenBlock from './chart/fullscreen'
 import CodeMirror from 'react-codemirror'
 import { getPlotData } from './utils'
 import Upload from './upload-button.png'
@@ -53,7 +53,7 @@ class ShowcaseLayout extends React.Component {
   componentDidMount() {
     this.setState({ mounted: true });
     // this.props.addCheckpoint()
-    this.props.addChart({
+    this.props.addBlock({
       key: 'upload',
       layout: {
         i: 'upload',
@@ -66,7 +66,7 @@ class ShowcaseLayout extends React.Component {
         moved: false,
         static: false,
       },
-      chart: {}
+      block: {}
     })
   }
 
@@ -74,8 +74,8 @@ class ShowcaseLayout extends React.Component {
     this.setState({ fullscreen: key })
   }
 
-  removeChart = (key) => () => {
-    this.props.removeChart(key)
+  removeBlock = (key) => () => {
+    this.props.removeBlock(key)
   }
 
   closeFullscreen = () => {
@@ -94,21 +94,21 @@ class ShowcaseLayout extends React.Component {
 
   closeEditor = () => {
     const { key, ...schema } = Yaml.parse(this.state.editor)
-    this.props.updateChartSchema(key, schema)
+    this.props.updateBlockSchema(key, schema)
     this.onEditorChange('')
   }
 
   onLayoutChange = (layouts) => {
     if (this.state.mounted) {
-      console.log('layout',this.props.charts.map(c => c.layout), layouts)
-      if (!isLayoutsEqual(this.props.charts.map(c => c.layout), layouts))
+      console.log('layout',this.props.blocks.map(c => c.layout), layouts)
+      if (!isLayoutsEqual(this.props.blocks.map(c => c.layout), layouts))
         this.props.addCheckpoint()
-      this.props.updateChartLayouts(JSON.parse(JSON.stringify(layouts)))
+      this.props.updateBlockLayouts(JSON.parse(JSON.stringify(layouts)))
     }
   };
 
-  downloadCharts = () => {
-    const data = JSON.stringify(this.props.charts)
+  downloadBlocks = () => {
+    const data = JSON.stringify(this.props.blocks)
     fileSaver.saveAs(new Blob([data], {type: "application/json"}), "plot.json");
   }
 
@@ -117,14 +117,14 @@ class ShowcaseLayout extends React.Component {
     const reader = new FileReader();
     reader.onload = () => {
       const fileAsBinaryString = reader.result;
-      const chart = Yaml.parse(fileAsBinaryString)
-      const key = (this.props.charts.length-1).toString()
-      const layout = this.props.charts.find(c => c.layout.i === 'upload').layout
+      const block = Yaml.parse(fileAsBinaryString)
+      const key = (this.props.blocks.length-1).toString()
+      const layout = this.props.blocks.find(c => c.layout.i === 'upload').layout
       this.props.addCheckpoint()
-      this.props.addChart(JSON.parse(JSON.stringify({
+      this.props.addBlock(JSON.parse(JSON.stringify({
         key,
         layout: { ...layout, i: key },
-        chart,
+        block,
       })))
     };
     reader.onabort = () => console.log('file reading was aborted');
@@ -135,7 +135,8 @@ class ShowcaseLayout extends React.Component {
   }
 
   renderPlot = (l) => {
-    const { layout, key, ...chart } = l;
+    const { layout, key, ...block } = l;
+    console.log(this.props, l)
     if (layout.i === 'upload') {
       let dropZoneRef
       return (
@@ -153,15 +154,15 @@ class ShowcaseLayout extends React.Component {
     }
 	  return (
       <div key={layout.i}>
-        <Chart
+        <Block
           layout={layout}
           data={getPlotData(this.props.data, l)}
           width={layout.w}
           height={layout.h}
-          handleLock={this.props.updateChartStatic}
-          removeChart={this.removeChart(layout.i)}
+          handleLock={this.props.updateBlockStatic}
+          removeBlock={this.removeBlock(layout.i)}
           setFullscreen={this.setFullscreen}
-          editChart={() => {this.onEditorChange(Yaml.stringify(chart))}}
+          editBlock={() => {this.onEditorChange(Yaml.stringify(block))}}
         />
       </div>
 	  );
@@ -170,11 +171,12 @@ class ShowcaseLayout extends React.Component {
   renderFullscreen = () => {
     const key = this.state.fullscreen
     return (
-      <div className="overlay">
+      <div className="overlay" onClick={this.closeFullscreen}>
         <div className="fullscreen-container">
-          <FullscreenChart
+          <FullscreenBlock
+            onClick={(e) => {e.stopPropagation()}}
             layout={this.state.fullscreen}
-            data={getPlotData(this.props.data, this.props.charts.find(c => c.key === key))}
+            data={getPlotData(this.props.data, this.props.blocks.find(c => c.key === key))}
             close={this.closeFullscreen}
           />
         </div>
@@ -200,12 +202,12 @@ class ShowcaseLayout extends React.Component {
   }
 
   render() {
-    // console.log(this.props.charts);
+    // console.log(this.props.blocks);
     return (
       <div>
         <ResponsiveReactGridLayout
           {...this.props}
-          layouts={{[this.state.currentBreakpoint]: this.props.charts.map(c => c.layout)}}
+          layouts={{[this.state.currentBreakpoint]: this.props.blocks.map(c => c.layout)}}
           // layouts={{ lg: this.state.layouts }}
           onBreakpointChange={this.onBreakpointChange}
           // onLayoutChange={this.onLayoutChange}
@@ -218,7 +220,7 @@ class ShowcaseLayout extends React.Component {
           useCSSTransforms={this.state.mounted}
           compactType="vertical"
         >
-          {this.props.charts.map(this.renderPlot)}
+          {this.props.blocks.map(this.renderPlot)}
         </ResponsiveReactGridLayout>
         {this.state.fullscreen ? this.renderFullscreen() : null}
         {this.state.editor ? this.renderEditor() : null}
@@ -228,9 +230,9 @@ class ShowcaseLayout extends React.Component {
 }
 
 export default compose(connect(
-    ({ connector, charts }) => ({
+    ({ connector, blocks }) => ({
       data: connector.data ? connector.data : [],
-      charts: Object.keys(charts).map(key => ({ key, ...charts[key] })),
+      blocks: Object.keys(blocks).map(key => ({ key, ...blocks[key] })),
     }),
     { ...actions, addCheckpoint }
   ))(ShowcaseLayout);

@@ -1,4 +1,4 @@
-export const addBlock = ({key, layout, block}) => ({
+export const addBlock = ({ key, layout, block} ) => ({
   type: 'ADD_BLOCK',
   key,
   layout,
