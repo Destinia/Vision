@@ -93,7 +93,7 @@ export default (state = defaultBlockState, action) => {
     case 'OVERWRITE_BLOCKS':
       return action.blocks
 
-    case 'CLEAN_BLOCKS':
+    case 'CLEAR_BLOCKS':
       return defaultBlockState
 
     default:
