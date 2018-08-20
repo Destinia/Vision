@@ -4,10 +4,11 @@ import { connect } from 'react-redux'
 import { Responsive, WidthProvider } from "react-grid-layout";
 import Dropzone from 'react-dropzone'
 import fileSaver from 'file-saver'
+import marked from 'marked'
 import * as actions from './action'
 import { addCheckpoint } from './store/checkpointEnhancer'
-import Block from './chart'
-import FullscreenBlock from './chart/fullscreen'
+import Chart from './blocks'
+import FullscreenBlock from './blocks/fullscreen'
 import CodeMirror from 'react-codemirror'
 import { getPlotData } from './utils'
 import Yaml from 'yamljs'
@@ -50,22 +51,6 @@ class ShowcaseLayout extends React.Component {
 
   componentDidMount() {
     this.setState({ mounted: true });
-    // this.props.addCheckpoint()
-    this.props.addBlock({
-      key: 'upload',
-      layout: {
-        i: 'upload',
-        x: 0,
-        y: 0,
-        w: 3,
-        h: 3,
-        minW: 3,
-        minH: 3,
-        moved: false,
-        static: false,
-      },
-      block: {}
-    })
   }
 
   setFullscreen = (key) => {
@@ -110,35 +95,54 @@ class ShowcaseLayout extends React.Component {
     fileSaver.saveAs(new Blob([data], {type: "application/json"}), "plot.json");
   }
 
+  parseFile = (data, ext) => {
+    let block = {}
+    if (ext === 'yaml' || ext === 'yml') {
+      block = { ...Yaml.parse(data), type: 'chart' }
+    } else if (ext === 'md' || ext === 'markdown') {
+      block = { content: data, type: 'markdown' }
+    } else if (ext === 'png' || ext === 'jpg' || ext === 'svg') {
+      block = { content: data, type: 'image' }
+    }
+    const key = (this.props.blocks.length - 1).toString()
+    const layout = this.props.blocks.find(c => c.layout.i === 'upload').layout
+    this.props.addCheckpoint()
+    this.props.addBlock(JSON.parse(JSON.stringify({
+      key,
+      type: 'markdown',
+      layout: { ...layout,
+        i: key,
+      },
+      block,
+    })))
+  }
 
-  onDrop = (accept, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const fileAsBinaryString = reader.result;
-      const block = Yaml.parse(fileAsBinaryString)
-      const key = (this.props.blocks.length-1).toString()
-      const layout = this.props.blocks.find(c => c.layout.i === 'upload').layout
-      this.props.addCheckpoint()
-      this.props.addBlock(JSON.parse(JSON.stringify({
-        key,
-        layout: { ...layout, i: key },
-        block,
-      })))
-    };
-    reader.onabort = () => console.log('file reading was aborted');
-    reader.onerror = () => console.log('file reading has failed');
-
-    reader.readAsBinaryString(accept[0]);
-
+  onDrop = (accept) => {
+    accept.forEach((f) => {
+      const reader = new FileReader()
+      const { name } = f
+      const extension = (/[.]/.exec(name)) ? /[^.]+$/.exec(name)[0] : undefined
+      reader.onabort = () => console.log('file reading was aborted');
+      reader.onerror = () => console.log('file reading has failed');
+      reader.onload = (event) => {
+        const fileAsBinaryString = reader.result;
+        this.parseFile(fileAsBinaryString, extension)
+      };
+      if ((/(gif|jpg|jpeg|tiff|png)$/i).test(extension)) {
+        reader.readAsDataURL(f);
+      } else {
+        reader.readAsBinaryString(f);
+      }
+    })
   }
 
   renderPlot = (l) => {
-    const { layout, key, ...block } = l;
-    console.log(this.props, l)
-    if (layout.i === 'upload') {
+    const { layout, key, type, content, ...block } = l;
+    console.log(l);
+    if (type === 'upload') {
       let dropZoneRef
       return (
-        <div key={layout.i} style={{ border: '2px solid #333', display: 'flex' }} data-grid={layout} onDoubleClick={() => {dropZoneRef.open()}}>
+        <div key={layout.i} style={{ border: '2px solid #333', display: 'flex' }} onDoubleClick={() => {dropZoneRef.open()}}>
           <Dropzone
             ref={(node) => { dropZoneRef = node;}}
             onDrop={this.onDrop}
@@ -149,21 +153,37 @@ class ShowcaseLayout extends React.Component {
             <span>Upload chart</span>
           </Dropzone>
         </div>)
+    } else if (type === 'markdown') {
+      return (
+        <div key={layout.i}>
+          <div
+            className="markdown"
+            dangerouslySetInnerHTML={{__html: marked(content)}}
+          />
+        </div>
+      )
+    } else if (type === 'image') {
+      return (
+        <div key={layout.i}>
+          <img className="image" src={content} />
+        </div>
+      )
+    } else if (type === 'chart') {
+      return (
+        <div key={layout.i}>
+          <Chart
+            layout={layout}
+            data={getPlotData(this.props.data, l)}
+            width={layout.w}
+            height={layout.h}
+            handleLock={this.props.updateBlockStatic}
+            removeBlock={this.removeBlock(layout.i)}
+            setFullscreen={this.setFullscreen}
+            editChart={() => {this.onEditorChange(Yaml.stringify(block))}}
+          />
+        </div>
+      );
     }
-    return (
-      <div key={layout.i}>
-        <Block
-          layout={layout}
-          data={getPlotData(this.props.data, l)}
-          width={layout.w}
-          height={layout.h}
-          handleLock={this.props.updateBlockStatic}
-          removeBlock={this.removeBlock(layout.i)}
-          setFullscreen={this.setFullscreen}
-          editBlock={() => {this.onEditorChange(Yaml.stringify(block))}}
-        />
-      </div>
-    );
   }
 
   renderFullscreen = () => {
@@ -182,6 +202,7 @@ class ShowcaseLayout extends React.Component {
   }
 
   renderEditor = () => {
+    console.log('editor');
     return (
       <div className="overlay">
         <div className="editor-container">
