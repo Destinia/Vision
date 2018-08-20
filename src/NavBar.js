@@ -3,7 +3,7 @@ import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 
-import { overwriteBlocks, cleanBlocks, toggleEditor } from './action'
+import { overwriteBlocks, clearBlocks, toggleEditor } from './action'
 import { jumpCheckpoint, addCheckpoint } from './store/checkpointEnhancer'
 import { loadFile, exportFile } from './utils'
 
@@ -34,7 +34,7 @@ function onFileUpload(dispatch, e) {
 
   loadFile(file, obj => {
     dispatch(addCheckpoint())
-    dispatch(cleanBlocks())
+    dispatch(clearBlocks())
     dispatch(overwriteBlocks(obj))
   })
 }
@@ -74,7 +74,7 @@ export default connect(
   dispatch => ({
     ...bindActionCreators({
       overwriteBlocks,
-      cleanBlocks,
+      clearBlocks,
       openChartEditor: toggleEditor.bind(null, 'chart'),
       openMarkdownEditor: toggleEditor.bind(null, 'markdown'),
       undo: jumpCheckpoint.bind(null, -1),
