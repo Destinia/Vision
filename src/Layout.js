@@ -202,7 +202,7 @@ class ShowcaseLayout extends React.Component {
   render() {
     // console.log(this.props.blocks);
     return (
-      <div>
+      <div className="app-layout">
         <ResponsiveReactGridLayout
           {...this.props}
           layouts={{[this.state.currentBreakpoint]: this.props.blocks.map(c => c.layout)}}

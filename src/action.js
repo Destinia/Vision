@@ -35,3 +35,8 @@ export const overwriteBlocks = blocks => ({
 export const cleanBlocks = () => ({
   type: 'CLEAN_BLOCKS',
 })
+
+export const toggleEditor = editor => ({
+  type: 'TOGGLE_EDITOR',
+  editor,
+})

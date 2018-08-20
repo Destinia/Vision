@@ -2,6 +2,7 @@ import { combineReducers } from 'redux'
 
 import { connectorReducer } from '../connectors'
 import blockReducer from './blocks'
+import editorReducer from './editor'
 
 /*
 import PropTypes as PT from 'prop-types'
@@ -55,6 +56,7 @@ rootState.propTypes = {
 const rootReducer = combineReducers({
   connector: connectorReducer,
   blocks: blockReducer,
+  editor: editorReducer,
 })
 
 

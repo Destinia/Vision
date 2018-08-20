@@ -1,7 +1,13 @@
 body {
     background: white;
     padding: 20px;
-    overflow: scroll;
+    height: 100%;
+    overflow: hidden;
+}
+
+.app-layout {
+  height: calc(100vh - 45px);
+  overflow-y: auto;
 }
 
 #content {
