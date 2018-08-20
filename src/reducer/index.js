@@ -2,6 +2,7 @@ import { combineReducers } from 'redux'
 import { routerReducer } from 'react-router-redux'
 import { connectorReducer } from '../connectors'
 import blockReducer from './blocks'
+import editorReducer from './editor'
 
 /*
 import PropTypes as PT from 'prop-types'
@@ -56,6 +57,8 @@ const rootReducer = combineReducers({
   connector: connectorReducer,
   blocks: blockReducer,
   routing: routerReducer,
+  editor: editorReducer,
+>>>>>>> Add editorReducer; Update navbar
 })
 
 
