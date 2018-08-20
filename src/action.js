@@ -1,37 +1,37 @@
-export const addChart = ({key, layout, chart}) => ({
-  type: 'ADD_CHART',
+export const addBlock = ({ key, layout, block} ) => ({
+  type: 'ADD_BLOCK',
   key,
   layout,
-  chart,
+  block,
 })
 
-export const removeChart = key => ({
-  type: 'REMOVE_CHART',
+export const removeBlock = key => ({
+  type: 'REMOVE_BLOCK',
   key,
 })
 
-export const updateChartLayouts = layouts => ({
-  type: 'UPDATE_CHART_LAYOUT',
+export const updateBlockLayouts = layouts => ({
+  type: 'UPDATE_BLOCK_LAYOUT',
   layouts,
 })
 
-export const updateChartStatic = (key, locked) => ({
-  type: 'UPDATE_CHART_STATIC',
+export const updateBlockStatic = (key, locked) => ({
+  type: 'UPDATE_BLOCK_STATIC',
   key,
   static: locked,
 })
 
-export const updateChartSchema = (key, schema) => ({
-  type: 'UPDATE_CHART_SCHEMA',
+export const updateBlockSchema = (key, schema) => ({
+  type: 'UPDATE_BLOCK_SCHEMA',
   key,
   schema,
 })
 
-export const overwriteChart = charts => ({
-  type: 'OVERWRITE_CHARTS',
-  charts,
+export const overwriteBlocks = blocks => ({
+  type: 'OVERWRITE_BLOCKS',
+  blocks,
 })
 
-export const cleanChart = () => ({
-  type: 'CLEAN_CHARTS',
+export const cleanBlocks = () => ({
+  type: 'CLEAN_BLOCKS',
 })
