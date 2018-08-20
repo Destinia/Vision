@@ -25,7 +25,6 @@ const selectPeriod = (data, startTime, endTime) => {
     end = data.length
   }
   const periodData = data.slice(start, end)
-  console.log(periodData);
   if (periodData.length) {
     const firstTime = periodData[0].timestamp
     return {
@@ -49,7 +48,6 @@ export const getPlotData = (data, chart) => {
   const startTime = moment(start_time, 'YYYY-MM-DD HH:mm:ss')
 	const chartData = sources.map(({ name, type }) => {
     const aggrData = aggregatePeriod(aggr_func, segment, data[name].values)
-    console.log(aggrData);
     return ({
       ...selectPeriod(aggrData || { values : [] }, startTime, endTime),
       type,
@@ -92,6 +90,5 @@ export const isLayoutsEqual = (a, b) => {
 const requiredKeys = ['x', 'y', 'h', 'w', 'i', 'static']
 
 const isLayoutEqual = (a, b) => {
-  console.log(requiredKeys.every(k => a[k] === b[k]));
   return requiredKeys.every(k => a[k] === b[k])
 }

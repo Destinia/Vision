@@ -1,6 +1,6 @@
 const defaultBlockState = {
   'upload': {
-    type: 'chart',
+    type: 'upload',
     layout: {
       i: 'upload',
       x: 0,
@@ -53,24 +53,13 @@ export default (state = defaultBlockState, action) => {
     }
 
     case 'UPDATE_BLOCK_STATIC': {
-      console.log(state, action.key);
       if (!state.hasOwnProperty(action.key)) return state
-      console.log({
-        ...state,
-        [action.key]: {
-          ...state[action.key],
-          layout: { ...state[action.key].layout,
-            static: action.static
-          }
-        }
-      });
       return {
         ...state,
         [action.key]: {
           ...state[action.key],
           layout: { ...state[action.key].layout,
-            static: action.static,
-            isDraggable: !action.static,
+            static: !state[action.key].layout.static,
           }
         }
       }

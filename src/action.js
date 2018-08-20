@@ -15,10 +15,9 @@ export const updateBlockLayouts = layouts => ({
   layouts,
 })
 
-export const updateBlockStatic = (key, locked) => ({
+export const updateBlockStatic = (key) => ({
   type: 'UPDATE_BLOCK_STATIC',
   key,
-  static: locked,
 })
 
 export const updateBlockSchema = (key, schema) => ({
