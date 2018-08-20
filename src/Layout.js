@@ -10,9 +10,7 @@ import Block from './chart'
 import FullscreenBlock from './chart/fullscreen'
 import CodeMirror from 'react-codemirror'
 import { getPlotData } from './utils'
-import Upload from './upload-button.png'
 import Yaml from 'yamljs'
-import _ from 'lodash'
 import { isLayoutsEqual } from './utils'
 
 import 'react-grid-layout/css/styles.css'
@@ -83,9 +81,9 @@ class ShowcaseLayout extends React.Component {
   }
 
   onBreakpointChange = breakpoint => {
-	this.setState({
-	  currentBreakpoint: breakpoint
-	});
+  this.setState({
+    currentBreakpoint: breakpoint
+  });
   };
 
   onEditorChange = (value) => {
@@ -152,7 +150,7 @@ class ShowcaseLayout extends React.Component {
           </Dropzone>
         </div>)
     }
-	  return (
+    return (
       <div key={layout.i}>
         <Block
           layout={layout}
@@ -165,8 +163,8 @@ class ShowcaseLayout extends React.Component {
           editBlock={() => {this.onEditorChange(Yaml.stringify(block))}}
         />
       </div>
-	  );
-	}
+    );
+  }
 
   renderFullscreen = () => {
     const key = this.state.fullscreen
