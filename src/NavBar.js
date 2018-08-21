@@ -17,6 +17,10 @@ const NavIcon = ({ enable = true, iconName, onClick, title }) => (
   </a>
 )
 
+function togglePreview() {
+  // TODO: get previewing status and set routing path
+}
+
 function onUploadBtnClick() {
   const upload = document.getElementById('upload-hidden-input')
   if (upload) {
@@ -82,5 +86,6 @@ export default connect(
     }, dispatch),
     upload: onFileUpload.bind(null, dispatch),
     clear: onClearLayout.bind(null, dispatch),
+    togglePreview,
   }),
 )(withRouter(NavBar))
