@@ -33,9 +33,7 @@ const defaultLayout = {
 
 class ShowcaseLayout extends React.Component {
   static defaultProps = {
-    className: "layout",
     rowHeight: 50,
-    onLayoutChange: function() {},
     cols: { lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 },
     data: [],
   };
@@ -172,6 +170,7 @@ class ShowcaseLayout extends React.Component {
     })
   }
 
+
   getBlockProps = (block) => {
     const { layout, type, key, content, ...info } = block
     switch (type) {
@@ -250,25 +249,24 @@ class ShowcaseLayout extends React.Component {
   }
 
   render() {
-    // console.log(this.props.blocks);
+    const { product } = this.props
+    const blocks = this.props.blocks.filter(b => !product || b.type != 'upload')
     return (
       <div className="app-layout">
         <ResponsiveReactGridLayout
           {...this.props}
+          className={`layout ${product? 'product':''}`}
           layouts={{[this.state.currentBreakpoint]: this.props.blocks.map(c => c.layout)}}
-          // layouts={{ lg: this.state.layouts }}
+          isDraggable={!product}
+          isResizable={!product}
           onBreakpointChange={this.onBreakpointChange}
-          // onLayoutChange={this.onLayoutChange}
-          // WidthProvider option
           measureBeforeMount={false}
-          // I like to have it animate on mount. If you don't, delete `useCSSTransforms` (it's default `true`)
-          // and set `measureBeforeMount={true}`.
           onDragStop={this.onLayoutChange}
           onResizeStop={this.onLayoutChange}
           useCSSTransforms={this.state.mounted}
           compactType="vertical"
         >
-          {this.props.blocks.map(this.renderPlot)}
+          {blocks.map(this.renderPlot)}
         </ResponsiveReactGridLayout>
         {this.state.fullscreen ? this.renderFullscreen() : null}
         {this.props.editor ? this.renderEditor() : null}

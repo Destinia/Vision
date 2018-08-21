@@ -27,7 +27,7 @@ class Block extends Component {
     const BLockComp = Blocks[type]
 
     // const size = { width: this.props.size.width, height: this.props.height*60-12 }
-    return <div className="block-container">
+    return <div className="block-container product">
         <i className="material-icons lock-btn" onClick={this.handleLockClick}>
           {layout.static ? "lock" : "lock_open"}
         </i>
