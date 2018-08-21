@@ -58,7 +58,6 @@ const rootReducer = combineReducers({
   blocks: blockReducer,
   routing: routerReducer,
   editor: editorReducer,
->>>>>>> Add editorReducer; Update navbar
 })
 
 
