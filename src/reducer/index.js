@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux'
-
+import { routerReducer } from 'react-router-redux'
 import { connectorReducer } from '../connectors'
 import blockReducer from './blocks'
 
@@ -55,6 +55,7 @@ rootState.propTypes = {
 const rootReducer = combineReducers({
   connector: connectorReducer,
   blocks: blockReducer,
+  routing: routerReducer,
 })
 
 
