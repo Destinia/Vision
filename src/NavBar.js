@@ -2,8 +2,9 @@
 import React from 'react'
 import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
+import { withRouter } from 'react-router'
 
-import { overwriteBlocks, cleanBlocks } from './action'
+import { overwriteBlocks, clearBlocks, toggleEditor } from './action'
 import { jumpCheckpoint, addCheckpoint } from './store/checkpointEnhancer'
 import { loadFile, exportFile } from './utils'
 
@@ -15,6 +16,10 @@ const NavIcon = ({ enable = true, iconName, onClick, title }) => (
     <i className={enable ? iconName : `${iconName} icon-disable`} />
   </a>
 )
+
+function togglePreview() {
+  // TODO: get previewing status and set routing path
+}
 
 function onUploadBtnClick() {
   const upload = document.getElementById('upload-hidden-input')
@@ -30,7 +35,7 @@ function onFileUpload(dispatch, e) {
 
   loadFile(file, obj => {
     dispatch(addCheckpoint())
-    dispatch(cleanBlocks())
+    dispatch(clearBlocks())
     dispatch(overwriteBlocks(obj))
   })
 }
@@ -39,14 +44,18 @@ function onClearLayout(dispatch) {
   dispatch(overwriteBlocks({}))
 }
 
-const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear, preview }) => (
-  <nav className='navbar'>
+const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear, openChartEditor, openMarkdownEditor, router: { getCurrentLocation, push }}) => {
+  const { pathname } = getCurrentLocation()
+  const preview = pathname === '/preview'
+  const togglePreview = preview ? push.bind(null, '/') : push.bind(null, '/preview')
+
+  return <nav className='navbar'>
     <ul>
-      <li><NavIcon iconName='icon-add-chart' title="Add Chart" /></li>
-      <li><NavIcon iconName='icon-add-markdown' title="Add Markdown" /></li>
+      <li><NavIcon iconName='icon-add-chart' title="Add Chart" onClick={openChartEditor} /></li>
+      <li><NavIcon iconName='icon-add-markdown' title="Add Markdown" onClick={openMarkdownEditor} /></li>
     </ul>
     <ul>
-      <li><NavIcon iconName={preview ? 'icon-preview-on' : 'icon-preview-off'} title="Toggle Preview" /></li>
+      <li><NavIcon iconName={preview ? 'icon-preview-on' : 'icon-preview-off'} title="Toggle Preview" onClick={togglePreview} /></li>
       <li className='list-separator'><span>|</span></li>
       <li><NavIcon iconName='icon-undo' enable={canUndo} onClick={undo} title="Undo" /></li>
       <li><NavIcon iconName='icon-redo' enable={canRedo} onClick={redo} title="Redo" /></li>
@@ -58,23 +67,25 @@ const NavBar = ({ canUndo, canRedo, undo, redo, upload, download, clear, preview
         onChange={upload} accept="application/x-yaml"/>
     </ul>
   </nav>
-)
+}
 
 export default connect(
-  ({ checkpoint: { history, current }, charts }) => ({
+  ({ checkpoint: { history, current }, blocks }) => ({
     canUndo: current > 0,
     canRedo: history.length - current !== 1,
-    download: exportFile.bind(null, charts),
-    preview: true,
+    download: exportFile.bind(null, blocks),
   }),
   dispatch => ({
     ...bindActionCreators({
       overwriteBlocks,
-      cleanBlocks,
+      clearBlocks,
+      openChartEditor: toggleEditor.bind(null, 'chart'),
+      openMarkdownEditor: toggleEditor.bind(null, 'markdown'),
       undo: jumpCheckpoint.bind(null, -1),
       redo: jumpCheckpoint.bind(null, 1),
     }, dispatch),
     upload: onFileUpload.bind(null, dispatch),
     clear: onClearLayout.bind(null, dispatch),
+    togglePreview,
   }),
-)(NavBar)
+)(withRouter(NavBar))
