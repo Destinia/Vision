@@ -7,23 +7,11 @@ import NavBar from './NavBar'
 import './App.css'
 
 
-const enhance = compose(
-  connect(
-    ({ connector }) => ({
-      data: connector.data ? Object.values(connector.data) : [],
-    })
-  ),
-)
-
-const Home = ({ data }) => (
+const Home = () => (
   <div className='App'>
     <NavBar />
-    <Layout data={data} />
+    <Layout />
   </div>
 )
 
-Home.propTypes = {
-  todos: PropTypes.array
-}
-
-export default enhance(Home)
+export default Home

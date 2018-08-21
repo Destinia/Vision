@@ -7,7 +7,7 @@ import fileSaver from 'file-saver'
 import marked from 'marked'
 import * as actions from './action'
 import { addCheckpoint } from './store/checkpointEnhancer'
-import Chart from './blocks'
+import Block from './blocks'
 import FullscreenBlock from './blocks/fullscreen'
 import CodeMirror from 'react-codemirror'
 import { getPlotData } from './utils'
@@ -53,8 +53,12 @@ class ShowcaseLayout extends React.Component {
     this.setState({ mounted: true });
   }
 
-  setFullscreen = (key) => {
+  setBlockFullscreen = (key) => () => {
     this.setState({ fullscreen: key })
+  }
+
+  handleBlockLock = (key) => () => {
+    this.props.updateBlockStatic(key)
   }
 
   removeBlock = (key) => () => {
@@ -83,16 +87,10 @@ class ShowcaseLayout extends React.Component {
 
   onLayoutChange = (layouts) => {
     if (this.state.mounted) {
-      console.log('layout',this.props.blocks.map(c => c.layout), layouts)
       if (!isLayoutsEqual(this.props.blocks.map(c => c.layout), layouts))
         this.props.addCheckpoint()
       this.props.updateBlockLayouts(JSON.parse(JSON.stringify(layouts)))
     }
-  };
-
-  downloadBlocks = () => {
-    const data = JSON.stringify(this.props.blocks)
-    fileSaver.saveAs(new Blob([data], {type: "application/json"}), "plot.json");
   }
 
   parseFile = (data, ext) => {
@@ -136,54 +134,46 @@ class ShowcaseLayout extends React.Component {
     })
   }
 
-  renderPlot = (l) => {
-    const { layout, key, type, content, ...block } = l;
-    console.log(l);
-    if (type === 'upload') {
-      let dropZoneRef
-      return (
-        <div key={layout.i} style={{ border: '2px solid #333', display: 'flex' }} onDoubleClick={() => {dropZoneRef.open()}}>
-          <Dropzone
-            ref={(node) => { dropZoneRef = node;}}
-            onDrop={this.onDrop}
-            disableClick
-            style={dropZoneStyle}
-          >
-            <i className="icon-file-upload" style={{ fontSize: '4rem' }} />
-            <span>Upload chart</span>
-          </Dropzone>
-        </div>)
-    } else if (type === 'markdown') {
-      return (
-        <div key={layout.i}>
-          <div
-            className="markdown"
-            dangerouslySetInnerHTML={{__html: marked(content)}}
-          />
-        </div>
-      )
-    } else if (type === 'image') {
-      return (
-        <div key={layout.i}>
-          <img className="image" src={content} />
-        </div>
-      )
-    } else if (type === 'chart') {
-      return (
-        <div key={layout.i}>
-          <Chart
-            layout={layout}
-            data={getPlotData(this.props.data, l)}
-            width={layout.w}
-            height={layout.h}
-            handleLock={this.props.updateBlockStatic}
-            removeBlock={this.removeBlock(layout.i)}
-            setFullscreen={this.setFullscreen}
-            editChart={() => {this.onEditorChange(Yaml.stringify(block))}}
-          />
-        </div>
-      );
+  getBlockProps = (block) => {
+    const { layout, type, key, content, ...info } = block
+    switch (type) {
+      case 'upload':
+        return {
+          onDrop: this.onDrop,
+        }
+      case 'chart':
+        return {
+          height: layout.h*(this.props.rowHeight+10)-12,
+          data: getPlotData(this.props.data, block),
+          editBlock: () => {this.onEditorChange(Yaml.stringify({ key, ...info }))}
+        }
+      case 'markdown':
+        return {
+          data: content,
+        }
+      case 'image':
+        return {
+          data: content,
+        }
+      default:
+        return {}
     }
+  }
+
+  renderPlot = (l) => {
+    const { layout, type, key } = l;
+    return (
+      <div key={key}>
+        <Block
+          layout={layout}
+          type={type}
+          handleLock={this.handleBlockLock(key)}
+          removeBlock={this.removeBlock(key)}
+          setFullscreen={this.setBlockFullscreen(key)}
+          {...this.getBlockProps(l)}
+        />
+      </div>
+    )
   }
 
   renderFullscreen = () => {
@@ -202,7 +192,6 @@ class ShowcaseLayout extends React.Component {
   }
 
   renderEditor = () => {
-    console.log('editor');
     return (
       <div className="overlay">
         <div className="editor-container">

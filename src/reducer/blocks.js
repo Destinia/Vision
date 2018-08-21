@@ -71,8 +71,8 @@ export default (state = defaultBlockState, action) => {
       const newState = {
         ...state,
         [action.key]: {
+          ...state[action.key],
           ...action.schema,
-          layout: state[action.key].layout,
         },
       }
 
