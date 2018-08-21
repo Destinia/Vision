@@ -2,9 +2,6 @@ import React from "react";
 import { compose } from 'redux'
 import { connect } from 'react-redux'
 import { Responsive, WidthProvider } from "react-grid-layout";
-import Dropzone from 'react-dropzone'
-import fileSaver from 'file-saver'
-import marked from 'marked'
 import * as actions from './action'
 import { addCheckpoint } from './store/checkpointEnhancer'
 import Block from './blocks'
@@ -18,20 +15,21 @@ import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/yaml/yaml'
+import 'codemirror/mode/markdown/markdown'
 import './Layout.css'
 
 const ResponsiveReactGridLayout = WidthProvider(Responsive);
 
-const dropZoneStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  position: 'relative',
-  width: '100%',
-  height: '100%',
+const defaultLayout = {
+  x: 0,
+  y: 0,
+  w: 3,
+  h: 3,
+  minW: 3,
+  minH: 3,
+  moved: false,
+  static: false,
 }
-
 
 class ShowcaseLayout extends React.Component {
   static defaultProps = {
@@ -46,7 +44,7 @@ class ShowcaseLayout extends React.Component {
     currentBreakpoint: "lg",
     fullscreen: null,
     mounted: false,
-    editor: '',
+    editor: { value: '' },
   };
 
   componentDidMount() {
@@ -76,13 +74,33 @@ class ShowcaseLayout extends React.Component {
   };
 
   onEditorChange = (value) => {
-    this.setState({ editor: value })
+    this.setState({ editor: { ...this.state.editor, value } })
   }
 
   closeEditor = () => {
-    const { key, ...schema } = Yaml.parse(this.state.editor)
-    this.props.updateBlockSchema(key, schema)
+    const { key, value } = this.state.editor
+    const schema = (this.props.editor === 'markdown') ? {
+      content: value
+    } : Yaml.parse(value)
+    if (this.props.blocks.find(b => b.key === key)) {
+      this.props.updateBlockSchema(key, schema)
+    } else {
+      const key = (this.props.blocks.length - 1).toString()
+      const layout = this.props.blocks.find(c => c.layout.i === 'upload').layout || defaultLayout
+
+      this.props.addCheckpoint()
+      this.props.addBlock(JSON.parse(JSON.stringify({
+        key,
+        layout: { ...layout,
+          i: key,
+        },
+        block: { ...schema,
+          type: this.props.editor,
+        },
+      })))
+    }
     this.onEditorChange('')
+    this.props.toggleEditor('')
   }
 
   onLayoutChange = (layouts) => {
@@ -103,7 +121,7 @@ class ShowcaseLayout extends React.Component {
       block = { content: data, type: 'image' }
     }
     const key = (this.props.blocks.length - 1).toString()
-    const layout = this.props.blocks.find(c => c.layout.i === 'upload').layout
+    const layout = this.props.blocks.find(c => c.layout.i === 'upload').layout || defaultLayout
     this.props.addCheckpoint()
     this.props.addBlock(JSON.parse(JSON.stringify({
       key,
@@ -134,6 +152,26 @@ class ShowcaseLayout extends React.Component {
     })
   }
 
+  onChartOpen = (key, value) => () => {
+    this.props.toggleEditor('chart');
+    this.setState({
+      editor: {
+        key,
+        value: Yaml.stringify(value),
+      }
+    })
+  }
+
+  onMarkdownOpen = (key, value) => () => {
+    this.props.toggleEditor('markdown');
+    this.setState({
+      editor: {
+        key,
+        value,
+      }
+    })
+  }
+
   getBlockProps = (block) => {
     const { layout, type, key, content, ...info } = block
     switch (type) {
@@ -145,11 +183,12 @@ class ShowcaseLayout extends React.Component {
         return {
           height: layout.h*(this.props.rowHeight+10)-12,
           data: getPlotData(this.props.data, block),
-          editBlock: () => {this.onEditorChange(Yaml.stringify({ key, ...info }))}
+          editBlock: this.onChartOpen(key, info),
         }
       case 'markdown':
         return {
           data: content,
+          editBlock: this.onMarkdownOpen(key, content),
         }
       case 'image':
         return {
@@ -192,14 +231,15 @@ class ShowcaseLayout extends React.Component {
   }
 
   renderEditor = () => {
+    const mode = (this.props.editor === 'chart')? 'yaml' : 'markdown'
     return (
       <div className="overlay">
         <div className="editor-container">
           <CodeMirror
             className="editor"
-            value={this.state.editor}
+            value={this.state.editor.value}
             onChange={this.onEditorChange}
-            options={{ lineNumbers: true, mode: 'yaml' }}
+            options={{ lineNumbers: true, mode }}
           />
           <i className="material-icons editor-close" onClick={this.closeEditor}>
             close
@@ -231,16 +271,17 @@ class ShowcaseLayout extends React.Component {
           {this.props.blocks.map(this.renderPlot)}
         </ResponsiveReactGridLayout>
         {this.state.fullscreen ? this.renderFullscreen() : null}
-        {this.state.editor ? this.renderEditor() : null}
+        {this.props.editor ? this.renderEditor() : null}
       </div>
     );
   }
 }
 
 export default compose(connect(
-    ({ connector, blocks }) => ({
+    ({ connector, blocks, editor }) => ({
       data: connector.data ? connector.data : [],
       blocks: Object.keys(blocks).map(key => ({ key, ...blocks[key] })),
+      editor
     }),
     { ...actions, addCheckpoint }
   ))(ShowcaseLayout);

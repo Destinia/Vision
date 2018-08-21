@@ -8,7 +8,8 @@ const defaultMarker = {
 }
 
 const defaultLayout = {
-  plotBackground: '#f3f6fa',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  paper_bgcolor: 'rgba(0,0,0,0)',
   margin: {
     t: 50,
     r: 20,
