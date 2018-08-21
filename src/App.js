@@ -3,7 +3,6 @@ import { Provider } from 'react-redux'
 import { Router, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
 
-import Home from './Home'
 import configureStore from './store'
 
 import rootReducer from './reducer'
