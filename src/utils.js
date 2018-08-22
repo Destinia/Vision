@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { saveAs } from 'file-saver/FileSaver'
+import css from 'css'
 import { aggregatePeriod } from './aggregation'
 import _ from 'lodash'
 
@@ -92,4 +93,17 @@ const requiredKeys = ['x', 'y', 'h', 'w', 'i', 'static']
 
 const isLayoutEqual = (a, b) => {
   return requiredKeys.every(k => a[k] === b[k])
+}
+
+export const addStylePrefix = (content, prefix) => {
+  return content.replace(/<style>([\s\S]+?)<\/style>/gm, (match) => {
+    console.log(match.replace(/<style>/, '').replace(/<\/style>/, ''))
+    const styles = css.parse(match.replace(/<style>/, '').replace(/<\/style>/,''))
+    const rules = styles.stylesheet.rules.map(r => ({ ...r,
+      selectors: r.selectors.map(s => `${prefix}${s}`)
+    }))
+    const newStyle = { ...styles, stylesheet: { ...styles.stylesheet, rules }}
+    console.log();
+    return `<style>\n${css.stringify(newStyle)}\n</style>`
+  })
 }

@@ -146,7 +146,7 @@ class ShowcaseLayout extends React.Component {
     if (ext === 'yaml' || ext === 'yml') {
       block = { ...Yaml.parse(data), type: 'chart' }
     } else if (ext === 'md' || ext === 'markdown') {
-      block = { content: data, type: 'markdown' }
+      block = { content: addStylePrefix(data, `#markdown${key}>`), type: 'markdown' }
     } else if (ext === 'png' || ext === 'jpg' || ext === 'svg') {
       block = { content: data, type: 'image' }
     }
