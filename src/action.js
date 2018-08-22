@@ -1,8 +1,9 @@
-export const addBlock = ({ key, layout, block} ) => ({
+export const addBlock = ({ key, layout, block, style={}}) => ({
   type: 'ADD_BLOCK',
   key,
   layout,
   block,
+  containerStyle: style,
 })
 
 export const removeBlock = key => ({

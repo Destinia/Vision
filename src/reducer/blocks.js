@@ -13,6 +13,9 @@ const defaultBlockState = {
       static: false,
     },
     block: {},
+    containerStyle: {
+      border: '2px solid #333',
+    }
   }
 }
 
