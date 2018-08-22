@@ -1,77 +1,99 @@
 # Vision
 
-A complete app example showing adding/updating/removing data from Firestore
+An easy-to-use, configurable visualization dashboard
 
-## How was it Started?
+## Quick Start
 
-This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
+1. After cloning the repository, run `npm install`.
+2. Run `npm run start` to start developing.
+3. Run `npm run build --production` to save production build in `/build`.
 
-Below you will find some information on how to perform common tasks.  
-You can find the most recent version of this guide [here](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md).
 
-## Folder Structure
+## Implementation Details
 
-After creation, your project should look like this:
+### Grid System
 
+> Implmented in `src/Layout.js`
+
+We use [STRML/react-grid-layout](https://github.com/STRML/react-grid-layout)  for the layout functionality. The state of layout is stored in redux store.
+
+### Preview & Production Mode
+
+> Implemented in `src/route.js`
+
+We use `react-router` to manage browser routing state. Each mode corresponds to one route.
+
+### Connector
+
+> Implemented in `src/connector/*`
+
+A connector should expose two function: `connectorEnhancer` and `connectorReducer`.
+
+#### `connectorReducer`
+
+The reducer has the interface `(state, action) -> state` that defines the shape of the data store as well as the connection status. It should (at least) have the following structure:
+
+```javascript
+{
+  schema: {
+    [key]: String, // The type of the "key" data in String format.
+  },
+  status: {
+    requesting: boolean,
+    requested: boolean,
+    timestamps: number,
+  },
+  data: {
+    [key]: {
+      values: [],
+    }
+  },
+}
 ```
-my-app/
-  README.md
-  index.html
-  favicon.ico
-  node_modules/
-  package.json
-  src/
-    App.css
-    App.js
-    App.test.js
-    index.css
-    index.js
-    logo.svg
-```
 
-For the project to build, **these files must exist with exact filenames**:
+#### `connectorEnhancer`
 
-* `index.html` is the page template;
-* `favicon.ico` is the icon you see in the browser tab;
-* `src/index.js` is the JavaScript entry point.
+It should be a function receiving a config object and returning the real enhancer. Inside the enhancer, backend connection is established, and an attribute is added to the main store. The content of the attribute is controlled/processed by `connectorReducer`.
 
-You can delete or rename the other files.
+### Checkpoint (a.k.a. undo/redo)
 
-You may create subdirectories inside `src`. For faster rebuilds, only files inside `src` are processed by Webpack.  
-You need to **put any JS and CSS files inside `src`**, or Webpack won’t see them.
+> Implemented in `src/store/checkpointEnhancer.js`
 
-You can, however, create more top-level directories.  
-They will not be included in the production build so you can use them for things like documentation.
+We implement a redux enhancer that watch for changes on an attribute of the store. The enhancer also adds an attribute (default to `checkpoint`) to the store and expose two actions `addCheckpoint` and `jumpCheckpoint` to manipute the checkpoint state.
 
-## Available Scripts
+The creation of `checkpointEnhancer` can optionally accept a config object with the folloing attributes:
 
-In the project directory, you can run:
+* path: the attribute to watch for in the store.
+* limit: the maximum number of stored checkpoints.
+* key: the name of the attribute that is added to the store.
+* equalFunc: the function that determines whether state changed when the last action came in.
 
-### `npm start`
+### Chart Drawing
+> Implemented in `src/blocks/Chart.js`
 
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
+[React Plotly](https://github.com/plotly/react-plotly.js)
 
 
-### Integrating Auth
+### Block Component
 
-Checkout [the auth recipes](/docs/recipes/auth) for some simple examples of how to integrate auth.
+> Implemented in `src/blocks/components/`
 
-**Warning**: You need to handle the loading state of auth! The recipes go over this, [but as mentioned in this issue here](https://github.com/prescottprue/react-redux-firebase/issues/93), it can seem unclear initially.
+There can be many kinds of block elements in the layout. Each block object has an attribute `type` to specify the type of the block. All block component types are defined in `src/blocks/components/index.jsx` and used in `src/blocks/index.jsx`.
 
-### Why Is Recompose Used
+### LocalStorage
 
-There are plenty of reasons to use [recompose](https://github.com/acdlite/recompose) (a utility belt for react components) which are not worth getting into here. The main reason it is used in this example it to keep the focus on the Firestore specific logic.
+> Implemented in `src/store/store.js`
 
-Another main reason Recompose is popular is that is can easily lead to patterns which greatly improve performance
+We use [elgerlambert/redux-localstorage](https://github.com/elgerlambert/redux-localstorage) to synchronize LocalStorage state witl current block contents. (This feature is only enabled in production build)
+
+### Test Backend
+
+> Implemented in `src/test-backend`
+
+This is used to generate fake data, so one can easily debug the dashboard. Currently only Firebase backend is supported.
+
+### Icons
+
+> Assets can be found in `src/icons`
+
+Downloaded from [iconmoon.io](http://icomoon.io/). We modify the content of `style.css` for styles when icons are hovered and disable styles.
