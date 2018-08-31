@@ -1,29 +1,24 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import { compose } from 'redux'
-import { connect } from 'react-redux'
 import Layout from './Layout'
 import NavBar from './NavBar'
-import './App.css'
 
 
-const enhance = compose(
-  connect(
-    ({ connector }) => ({
-      data: connector.data ? Object.values(connector.data) : [],
-    })
-  ),
-)
-
-const Home = ({ data }) => (
+export const Home = () => (
   <div className='App'>
     <NavBar />
-    <Layout data={data} />
+    <Layout />
   </div>
 )
 
-Home.propTypes = {
-  todos: PropTypes.array
-}
+export const Preview = () => (
+  <div className='App'>
+    <NavBar />
+    <Layout product />
+  </div>
+)
 
-export default enhance(Home)
+export const Product = () => (
+  <div className='App'>
+    <Layout product />
+  </div>
+)

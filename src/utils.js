@@ -1,5 +1,6 @@
 import moment from 'moment';
 import { saveAs } from 'file-saver/FileSaver'
+import css from 'css'
 import { aggregatePeriod } from './aggregation'
 import _ from 'lodash'
 
@@ -8,7 +9,8 @@ const defaultMarker = {
 }
 
 const defaultLayout = {
-  plotBackground: '#f3f6fa',
+  plot_bgcolor: 'rgba(0,0,0,0)',
+  paper_bgcolor: 'rgba(0,0,0,0)',
   margin: {
     t: 50,
     r: 20,
@@ -25,7 +27,6 @@ const selectPeriod = (data, startTime, endTime) => {
     end = data.length
   }
   const periodData = data.slice(start, end)
-  console.log(periodData);
   if (periodData.length) {
     const firstTime = periodData[0].timestamp
     return {
@@ -49,7 +50,6 @@ export const getPlotData = (data, chart) => {
   const startTime = moment(start_time, 'YYYY-MM-DD HH:mm:ss')
 	const chartData = sources.map(({ name, type }) => {
     const aggrData = aggregatePeriod(aggr_func, segment, data[name].values)
-    console.log(aggrData);
     return ({
       ...selectPeriod(aggrData || { values : [] }, startTime, endTime),
       type,
@@ -92,6 +92,18 @@ export const isLayoutsEqual = (a, b) => {
 const requiredKeys = ['x', 'y', 'h', 'w', 'i', 'static']
 
 const isLayoutEqual = (a, b) => {
-  console.log(requiredKeys.every(k => a[k] === b[k]));
   return requiredKeys.every(k => a[k] === b[k])
+}
+
+export const addStylePrefix = (content, prefix) => {
+  return content.replace(/<style>([\s\S]+?)<\/style>/gm, (match) => {
+    console.log(match.replace(/<style>/, '').replace(/<\/style>/, ''))
+    const styles = css.parse(match.replace(/<style>/, '').replace(/<\/style>/,''))
+    const rules = styles.stylesheet.rules.map(r => ({ ...r,
+      selectors: r.selectors.map(s => `${prefix}${s}`)
+    }))
+    const newStyle = { ...styles, stylesheet: { ...styles.stylesheet, rules }}
+    console.log();
+    return `<style>\n${css.stringify(newStyle)}\n</style>`
+  })
 }
