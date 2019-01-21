@@ -8,9 +8,8 @@ import { addCheckpoint } from './store/checkpointEnhancer'
 import Block from './blocks'
 import FullscreenBlock from './blocks/fullscreen'
 import CodeMirror from 'react-codemirror'
-import { getPlotData, addStylePrefix } from './utils'
+import { getPlotData, addStylePrefix, isLayoutsEqual } from './utils'
 import Yaml from 'yamljs'
-import { isLayoutsEqual } from './utils'
 
 import 'react-grid-layout/css/styles.css'
 import 'react-resizable/css/styles.css'
@@ -82,7 +81,7 @@ class ShowcaseLayout extends React.Component {
     this.setState({ editor: { ...this.state.editor, value } })
   }
 
-  onEditorValueChange = (style) => {
+  onEditorStyleChange = (style) => {
     this.setState({ editor: { ...this.state.editor, style } })
   }
 
@@ -101,7 +100,7 @@ class ShowcaseLayout extends React.Component {
     // }
     this.props.addCheckpoint()
     if (this.props.blocks.find(b => b.key === key)) {
-      const containerStyle = JSON.parse(style)
+      // const containerStyle = JSON.parse(style)
       this.props.updateBlockSchema(key, schema)
     } else {
       const key = (this.props.blocks.length - 1).toString()
@@ -206,7 +205,7 @@ class ShowcaseLayout extends React.Component {
 
 
   getBlockProps = (block) => {
-    const { layout, type, key, content, containerStyle, ...info } = block
+    const { layout, type, key, content, containerStyle=defaultBlockStyle, ...info } = block
     switch (type) {
       case 'upload':
         return {
@@ -216,6 +215,39 @@ class ShowcaseLayout extends React.Component {
         return {
           height: layout.h*(this.props.rowHeight+10)-12,
           data: getPlotData(this.props.data, block),
+          editBlock: this.onChartOpen(key, info, JSON.stringify(containerStyle)),
+        }
+      case 'markdown':
+        return {
+          data: content,
+          editBlock: this.onMarkdownOpen(key, content, JSON.stringify(containerStyle)),
+        }
+      case 'image':
+        return {
+          data: content,
+        }
+      default:
+        return {}
+    }
+  }
+
+  getFullscreenBlockProps = (block) => {
+    const { layout, type, key, content, containerStyle, ...info } = block
+    switch (type) {
+      case 'upload':
+        return {
+          onDrop: this.onDrop,
+        }
+      case 'chart':
+        const chartData = getPlotData(this.props.data, block)
+        return {
+          data: {
+            ...chartData,
+            layout: { ...chartData.layout,
+              plot_bgcolor: 'white',
+              paper_bgcolor: 'white'
+            }
+          },
           editBlock: this.onChartOpen(key, info, JSON.stringify(containerStyle)),
         }
       case 'markdown':
@@ -252,14 +284,16 @@ class ShowcaseLayout extends React.Component {
 
   renderFullscreen = () => {
     const key = this.state.fullscreen
+    const block = this.props.blocks.find(c => c.key === key)
+    const props = this.getFullscreenBlockProps(block)
     return (
       <div className="overlay" onClick={this.closeFullscreen}>
         <div className="fullscreen-container">
           <FullscreenBlock
+            type={block.type}
             onClick={(e) => {e.stopPropagation()}}
-            layout={this.state.fullscreen}
-            data={getPlotData(this.props.data, this.props.blocks.find(c => c.key === key))}
             close={this.closeFullscreen}
+            {...props}
           />
         </div>
       </div>)

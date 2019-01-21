@@ -1,3 +1,8 @@
+<style>
+  h1 {
+    color: green;
+  }
+</style>
 # Vision
 
 An easy-to-use, configurable visualization dashboard

@@ -6,6 +6,6 @@ export default (
   <Route path="/">
     <IndexRoute component={Home} />
     <Route path="preview" component={Preview} />
-    <Route path="prod" component={Product} />
+    <Route path="production" component={Product} />
   </Route>
 )

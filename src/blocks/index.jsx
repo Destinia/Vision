@@ -33,7 +33,7 @@ class Block extends Component {
         <i className="material-icons close-btn" onClick={removeBlock}>
           close
         </i>
-        <i className="material-icons fullscreen-btn" onClick={this.handleFullscreen}>fullscreen</i>
+        {(type !== 'upload') ? <i className="material-icons fullscreen-btn" onClick={this.handleFullscreen}>fullscreen</i>:null}
         {(editBlock) ? <i className="material-icons edit-btn" onClick={editBlock}>edit</i> : null}
         <BLockComp {...props} id={`${type}${layout.i}`} />
       </div>;
