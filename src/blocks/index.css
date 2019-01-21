@@ -61,3 +61,11 @@
 .product>.material-icons {
   display: none;
 }
+
+.markdown>h1 {
+  text-align: center;
+}
+
+.product>.markdown {
+  background-color: transparent;
+}
